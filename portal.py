@@ -8,7 +8,7 @@ class CaptivePortal:
 
     @cherrypy.expose
     def default(self,*args,**kwargs):
-        return open("C:\\Users\\Sandra\\Documents\\Semester Project 2\\acceptpage.html", "rb").read()
+        return open("/opt/mainportal/splash_page.html", "rb").read()
     
 
     @cherrypy.expose
@@ -27,7 +27,7 @@ class CaptivePortal:
 
 if __name__ == '__main__':
     cherrypy.config.update({
-                        'server.socket_port': 8081,
+                        'server.socket_port': 8080,
                         'server.socket_host': '0.0.0.0'
                        })
     cherrypy.quickstart(CaptivePortal())
