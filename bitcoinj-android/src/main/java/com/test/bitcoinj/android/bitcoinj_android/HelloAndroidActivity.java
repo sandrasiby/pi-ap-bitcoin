@@ -6,6 +6,8 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.bitcoin.core.Wallet;
@@ -28,7 +30,7 @@ public class HelloAndroidActivity extends Activity {
         
         final TextView walletBalance = (TextView) findViewById(R.id.balance);
         
-        PaymentChannelClient andClient = new PaymentChannelClient();
+        final PaymentChannelClient andClient = new PaymentChannelClient();    //Create client instance
         
         try {
         	Log.e(TAG, "Started Client");
@@ -39,9 +41,27 @@ public class HelloAndroidActivity extends Activity {
 			e.printStackTrace();
 		}
         
-        Wallet bitcoinWallet = andClient.displayWallet();
+        Wallet bitcoinWallet = andClient.displayWallet();            //Show wallet contents
         String bal = bitcoinWallet.getBalance().toString();
-        walletBalance.setText(bal);
+        walletBalance.setText(bal);                                   //Set balance text with wallet balance
+        
+        final Button button1 = (Button) findViewById(R.id.open);
+        button1.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Perform action on click
+            	//andClient.openConnection();                       //TO BE TESTED
+            }
+        });
+        
+        final Button button2 = (Button) findViewById(R.id.close);
+        button2.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Perform action on click
+            	//andClient.closeConnection();                       //TO BE TESTED
+            }
+        });
+
+
         
        
     }
