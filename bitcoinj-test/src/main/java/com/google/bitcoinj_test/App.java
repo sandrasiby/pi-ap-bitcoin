@@ -23,7 +23,16 @@ public class App
 			p = Runtime.getRuntime().exec(cmd);
 			p.waitFor();
 			
-    		System.out.println(System.getProperty("user.dir"));
+    		//System.out.println(System.getProperty("user.dir"));
+    		
+			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			 String clientMac = reader.readLine();
+			 System.out.println(clientMac);
+			  /*while (clientMac != null) {
+				  System.out.println(clientMac);
+				clientMac = reader.readLine();
+				//System.out.println(clientMac);
+			  }*/
 			//ProcessBuilder pb = new ProcessBuilder("./test.sh", "testing");
 			//Process pc = pb.start();
 	   	
