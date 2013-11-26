@@ -82,36 +82,33 @@ public class ExamplePaymentChannelServer implements PaymentChannelServerListener
             public void channelOpen(Sha256Hash channelId) {
             	
                 log.info("Channel open for {}: {}.", clientAddress, channelId);
-                try {
-					p = r.exec("arp -a " + clientAddress.toString() + " | awk '{ print $4 }' ");
-					p.waitFor();
-					 
-					  BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-					  clientMac = reader.readLine();
-					  while (clientMac != null) {
-						clientMac = reader.readLine();
-						System.out.println(clientMac);
-					  }
                 
-                } catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+                
+                //Get client's MAC address
                 
                 try {
-					p = r.exec("sudo iptables -t mangle -I internet 1 -m mac --mac-source " + clientMac + " -j RETURN");
-					p.waitFor();
-					p = r.exec("sudo rmtrack " + clientAddress.toString());
-					p.waitFor();
-                } catch (IOException | InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+                		String[] cmd3 = {"./firewall.sh", "mac", clientAddress.toString()};
+                		p = r.exec(cmd3);
+                		p.waitFor();
+                		
+					    BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+					    clientMac = reader.readLine();
+					    System.out.println(clientMac);
                 
-
+                	} catch (IOException | InterruptedException e1) {
+                		e1.printStackTrace();
+                	}
+                
+                //Set firewall rules for accepted client
+                try {
+                		String[] cmd1 = {"./firewall.sh", "open", clientAddress.toString(), clientMac};
+                		p = r.exec(cmd1);
+                		p.waitFor();
+                	
+                	} catch (IOException | InterruptedException e1) {
+                		e1.printStackTrace();
+                	}
+                
                 // Try to get the state object from the stored state set in our wallet
                 PaymentChannelServerState state = null;
                 try {
@@ -137,16 +134,17 @@ public class ExamplePaymentChannelServer implements PaymentChannelServerListener
             @Override
             public void channelClosed(PaymentChannelCloseException.CloseReason reason) {
                 log.info("Client {} closed channel for reason {}", clientAddress, reason);
+                
+                //Change firewall rules when channel closes
                 try {
-					p = r.exec("sudo iptables -D internet -t mangle -m mac --mac-source " + clientMac + " -j RETURN");
-					p.waitFor();
-					p = r.exec("sudo rmtrack " + clientAddress);
-					p.waitFor();
-                } catch (IOException | InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-               
+            	    	String[] cmd2 = {"./firewall.sh", "close", clientAddress.toString(), clientMac};
+            		    p = r.exec(cmd2);
+            		    p.waitFor();
+            	
+                } catch (IOException | InterruptedException e1) {
+            			e1.printStackTrace();
+                }              
+                              
             }
         };
     }
