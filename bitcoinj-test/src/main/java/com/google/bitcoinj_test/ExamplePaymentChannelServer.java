@@ -29,7 +29,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.sql.Timestamp;
 
 /**
  * Simple server that listens on port 4242 for incoming payment channels.
@@ -82,22 +85,29 @@ public class ExamplePaymentChannelServer implements PaymentChannelServerListener
             public void channelOpen(Sha256Hash channelId) {
             	
                 log.info("Channel open for {}: {}.", clientAddress, channelId);
-                
-                
+                System.out.println("SS OPEN CHANNEL: " + new Timestamp(System.currentTimeMillis()));
+               
+                InetSocketAddress i = (InetSocketAddress) clientAddress;
+                InetAddress ip = i.getAddress();
+                System.out.println("Client Address is " + ip.toString().substring(1));
                 //Get client's MAC address
                 
                 try {
-                		String[] cmd3 = {"./firewall.sh", "mac", clientAddress.toString()};
+                		String[] cmd3 = {"./firewall.sh", "mac", ip.toString().substring(1)};
                 		p = r.exec(cmd3);
                 		p.waitFor();
                 		
 					    BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 					    clientMac = reader.readLine();
 					    System.out.println(clientMac);
+					    System.out.println("SS GET MAC: " + new Timestamp(System.currentTimeMillis()));
                 
-                	} catch (IOException | InterruptedException e1) {
+                	} catch (IOException e1) {
                 		e1.printStackTrace();
-                	}
+                	} catch (InterruptedException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
                 
                 //Set firewall rules for accepted client
                 try {
@@ -105,9 +115,14 @@ public class ExamplePaymentChannelServer implements PaymentChannelServerListener
                 		p = r.exec(cmd1);
                 		p.waitFor();
                 	
-                	} catch (IOException | InterruptedException e1) {
+                	} catch (IOException e1) {
                 		e1.printStackTrace();
-                	}
+                	} catch (InterruptedException e2) {
+						// TODO Auto-generated catch block
+						e2.printStackTrace();
+					}
+                
+                System.out.println("SS OPEN FW: " + new Timestamp(System.currentTimeMillis()));
                 
                 // Try to get the state object from the stored state set in our wallet
                 PaymentChannelServerState state = null;
@@ -141,9 +156,14 @@ public class ExamplePaymentChannelServer implements PaymentChannelServerListener
             		    p = r.exec(cmd2);
             		    p.waitFor();
             	
-                } catch (IOException | InterruptedException e1) {
+                } catch (IOException e1) {
             			e1.printStackTrace();
-                }              
+                } catch (InterruptedException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}  
+
+                System.out.println("SS CLOSE FW: " + new Timestamp(System.currentTimeMillis()));
                               
             }
         };
