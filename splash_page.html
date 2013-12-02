@@ -2,13 +2,6 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<script language="javascript" type="text/javascript">
-function accept(){
-
-setTimeout("this.document.location.href = 'http://google.ch';",1000);
-
-}
-</script>
 </head>
 
 <body>
@@ -17,9 +10,7 @@ setTimeout("this.document.location.href = 'http://google.ch';",1000);
 
 <p>Welcome to Pi_AP! You can connet to this Access Point, surf the Internet and pay in bitcoins based on your usage. To accept and get Internet access, please click on the link below:</p>
 
-<p><a href="http://192.168.42.1:8080/accept" onclick="accept();">I understand that I will have to pay for using the srvices of Pi_AP. Give me access!</a></p>
-<p id="acceptP></p>
-<iframe id="id_dummy" src="" style="display:none"></iframe>
+<p><a href="http://$ap_domain:8080/accept?redirect_to=$redirect_to">I understand that I will have to pay for using the srvices of Pi_AP. Give me access!</a></p>
 
 </body>
 </html>

@@ -1,36 +1,75 @@
 #!/usr/bin/env python
 
-import cherrypy
 import os
 import subprocess
+import cherrypy
+import urllib
+import shlex, subprocess
 
-class CaptivePortal:
+from cherrypy import expose
+from string import Template
+
+config = {
+    "ap_domain": "bitcoin-ap",
+    "default_redirect" : "http://www.ethz.ch"
+    }
+
+class CaptivePortal(object):
 
     @cherrypy.expose
     def default(self,*args,**kwargs):
-        return open("/opt/mainportal/splash_page.html", "rb").read()
-    
+        global config
+        redirect_to = config['default_redirect']
+
+        if 'redirect_to' in kwargs.keys():
+            redirect_to = kwargs['redirect_to']
+        template = Template(open("splash_page.html", "rb").read())
+
+        return template.substitute(redirect_to=redirect_to, ap_domain=config['ap_domain'])
 
     @cherrypy.expose
-    def accept(self):
+    def accept(self, **kwargs):
         remoteip = cherrypy.request.headers["Remote-Addr"]
         remotemac = str(os.popen("arp -a " + str(remoteip) + " | awk '{ print $4 }' " ).read())
         
         print remoteip
         print remotemac
 
-        changerule = os.popen("sudo iptables -t mangle -I internet 1 -m mac --mac-source " + remotemac + " -j RETURN")
-        remtrack = os.popen("sudo rmtrack " + str(remoteip))
+        subprocess.Popen(shlex.split("sudo iptables -t mangle -I internet 1 -m mac --mac-source " + remotemac + " -j RETURN")).wait()
+        subprocess.Popen(shlex.split("sudo rmtrack " + str(remoteip))).wait()
+        raise cherrypy.HTTPRedirect(kwargs['redirect_to'])
 
-        raise cherrypy.HTTPRedirect("http://www.google.ch")
-            
+class Catcher(object):
+    """
+    A simple CherryPy Web Request handler that takes care of redirecting every 
+    user to the access point, passing the originally requested URL as parameter.
+    """
+
+    @expose
+    def default(self,*args,**kwargs):
+        global config
+        raise cherrypy.HTTPRedirect("http://" +config['ap_domain'] + ":8080/?redirect_to=" + urllib.quote(cherrypy.url()))
 
 if __name__ == '__main__':
     cherrypy.config.update({
                         'server.socket_port': 8080,
                         'server.socket_host': '0.0.0.0'
                        })
-    cherrypy.quickstart(CaptivePortal())
+    conf = {
+        "/": {
+            "request.dispatch": cherrypy.dispatch.VirtualHost(
+                **{
+                    config['ap_domain'] + ":8080": "/bitcoin_ap",
+                    }
+                  )
+            }
+        }
+
+    catcher = Catcher()
+    cherrypy.tree.mount(catcher, "/", conf)
+    catcher.bitcoin_ap = CaptivePortal()
+    cherrypy.engine.start()
+    cherrypy.engine.block()
     
     
 
