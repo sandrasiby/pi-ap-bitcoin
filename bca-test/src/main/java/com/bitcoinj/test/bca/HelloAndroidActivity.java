@@ -7,10 +7,13 @@ import com.bitcoinj.test.bca.PaymentChannelClient;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class HelloAndroidActivity extends Activity {
@@ -21,6 +24,7 @@ public class HelloAndroidActivity extends Activity {
      * previously being shut down then this Bundle contains the data it most 
      * recently supplied in onSaveInstanceState(Bundle). <b>Note: Otherwise it is null.</b>
      */
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	
@@ -32,26 +36,44 @@ public class HelloAndroidActivity extends Activity {
         
         final PaymentChannelClient andClient = new PaymentChannelClient(HelloAndroidActivity.this);    //Create client instance
         
-        /*try {
-        	Log.e(TAG, "Started Client");
-			andClient.run("127.0.0.1");
+                              
+        try {
+        		Log.e(TAG, "Started Client");
+        		andClient.run("127.0.0.1");
 			
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
+			} catch (Exception e) {
+					e.printStackTrace();
+			}
         
-//        File sdCard = Environment.getExternalStorageDirectory();
-//      File dir = new File (sdCard.getAbsolutePath() + "/wf");
-//        dir.mkdirs();
-//        Log.e(TAG,sdCard.getAbsolutePath());
-        
-       andClient.displayWallet();            //Show wallet contents
+
        Log.e(TAG, "Loaded wallet kit");
-       // String bal = bitcoinWallet.getBalance().toString();
-        //walletBalance.setText(bal);                    
+       
+       final String balance = andClient.displayWallet();
+       walletBalance.setText(balance);         
+       Log.e(TAG, "First Balance shown");
+       
+         final Button button1 = (Button) findViewById(R.id.open);
+       button1.setOnClickListener(new View.OnClickListener() {
+           public void onClick(View v) {
+               // Perform action on click
+           	 andClient.openConnection();
+           	walletBalance.setText(andClient.displayWallet());
+           	 Log.e(TAG, "Opened");
+           }
+       });
+       
+       final Button button2 = (Button) findViewById(R.id.close);
+       button2.setOnClickListener(new View.OnClickListener() {
+           public void onClick(View v) {
+               // Perform action on click
+           	 andClient.closeConnection();
+           	 Log.e(TAG, "Closed");
+           }
+       }); 
+
         
     }
+    
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
