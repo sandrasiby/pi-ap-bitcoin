@@ -29,14 +29,7 @@ class CaptivePortal(object):
 
     @cherrypy.expose
     def accept(self, **kwargs):
-        remoteip = cherrypy.request.headers["Remote-Addr"]
-        remotemac = str(os.popen("arp -a " + str(remoteip) + " | awk '{ print $4 }' " ).read())
         
-        print remoteip
-        print remotemac
-
-        subprocess.Popen(shlex.split("sudo iptables -t mangle -I internet 1 -m mac --mac-source " + remotemac + " -j RETURN")).wait()
-        subprocess.Popen(shlex.split("sudo rmtrack " + str(remoteip))).wait()
         raise cherrypy.HTTPRedirect(kwargs['redirect_to'])
 
 class Catcher(object):
