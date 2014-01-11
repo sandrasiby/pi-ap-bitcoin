@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout
+        android:id="@+id/widget0"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+<Button
+        android:id="@+id/open"
+        android:layout_width="321dp"
+        android:layout_height="wrap_content"
+        android:text="Open"
+        android:gravity="center"
+        android:layout_x="-1dp"
+        android:layout_y="308dp" />
+<ImageView
+        android:id="@+id/widget34"
+        android:layout_width="74dp"
+        android:layout_height="69dp"
+        android:src="@drawable/bitcoinlogo"
+        android:layout_x="2dp"
+        android:layout_y="146dp" />
+<Button
+        android:id="@+id/close"
+        android:layout_width="321dp"
+        android:layout_height="wrap_content"
+        android:text="Close"
+        android:layout_x="-1dp"
+        android:layout_y="366dp" />
+<TextView
+        android:id="@+id/balance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:hint="Blah"
+        android:layout_x="89dp"
+        android:layout_y="165dp" />
+
+
+</AbsoluteLayout>
