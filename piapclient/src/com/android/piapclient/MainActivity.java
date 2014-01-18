@@ -50,9 +50,12 @@ public class MainActivity extends Activity {
        button1.setOnClickListener(new View.OnClickListener() {
            public void onClick(View v) {
                // Perform action on click
-                    andClient.openConnection();
-                   walletBalance.setText(andClient.displayWallet());
-                    Log.e(TAG, "Opened");
+        	   new Thread(new Runnable() {
+                   public void run() {
+                     andClient.openConnection();
+                   }
+                 }).start();
+                 Log.e(TAG, "Opened");
            }
        });
        
@@ -60,7 +63,12 @@ public class MainActivity extends Activity {
        button2.setOnClickListener(new View.OnClickListener() {
            public void onClick(View v) {
                // Perform action on click
-                    andClient.closeConnection();
+        	   		Log.e(TAG, "Going to close");
+        	   		new Thread(new Runnable() {
+                        public void run() {
+                          andClient.closeConnection();
+                        }
+                      }).start();
                     Log.e(TAG, "Closed");
            }
        });

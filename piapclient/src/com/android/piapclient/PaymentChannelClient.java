@@ -36,7 +36,7 @@ public class PaymentChannelClient {
     private final BigInteger channelSize;
     private final ECKey myKey;
     private final NetworkParameters params;
-    private String host = "10.2.121.187"; //TO BE CHANGED (URI)
+    private String host = "192.168.178.33"; //TO BE CHANGED (URI)
     private int rounds;
     private int interval; //minutes
     private String TAG = "PaymentClient";
@@ -52,7 +52,7 @@ public class PaymentChannelClient {
         myKey = new ECKey();
         params = TestNet3Params.get();
         rounds = 10;
-        interval = 1;
+        interval = 10;
         
     }
              
@@ -128,17 +128,25 @@ public class PaymentChannelClient {
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}  // 1 hour.
+		}  // 1 hour.*/
         Log.e(TAG, "Stopping ...");
         appKit.stopAndWait();
    }
     
     public void closeConnection()
     {
+    	Log.e(TAG, "CLosing");
+    	
     	if (client != null)
     	{
             client.close();
     	}
+    	
+    	else 
+    	{
+    		Log.e(TAG, "Closed already");
+    	}
+    	
     }
     
     private void openAndSend(int timeoutSecs, InetSocketAddress server, String channelID) throws IOException, ValueOutOfRangeException, InterruptedException {
