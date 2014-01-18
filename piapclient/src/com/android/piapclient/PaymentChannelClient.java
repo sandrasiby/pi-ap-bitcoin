@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.bitcoin.core.*;
 import com.google.bitcoin.kits.WalletAppKit;
@@ -35,13 +36,14 @@ public class PaymentChannelClient {
     private final BigInteger channelSize;
     private final ECKey myKey;
     private final NetworkParameters params;
-    private String host = "127.0.0.1"; //TO BE CHANGED (URI)
+    private String host = "10.2.121.187"; //TO BE CHANGED (URI)
     private int rounds;
     private int interval; //minutes
     private String TAG = "PaymentClient";
     private Context context;
     private MainActivity con;
     PaymentChannelClientConnection client;
+    BigInteger amountPlusFee;
     
     public PaymentChannelClient(MainActivity ctx) {
         this.context = ctx;
@@ -79,7 +81,14 @@ public class PaymentChannelClient {
         
         appKit.startAndWait();    
         
-        Log.e(TAG, appKit.wallet().toString());
+        Log.e(TAG, appKit.wallet().toString());       
+       
+        con.runOnUiThread(new Runnable() {
+            public void run() {
+            	final TextView walletBalance = (TextView) con.findViewById(R.id.balance);
+                walletBalance.setText(displayWallet());
+            }
+        });
     }
     
     public String displayWallet()
@@ -157,8 +166,12 @@ public class PaymentChannelClient {
                     
                     Log.e("Successfully sent one micropayment, total remaining on channel is now {}", client.state().getValueRefunded().toString());
                     
-                    final TextView walletBalance = (TextView) con.findViewById(R.id.balance);
-                    walletBalance.setText(appKit.wallet().getBalance().toString());
+                    con.runOnUiThread(new Runnable() {
+                        public void run() {
+                        	final TextView walletBalance = (TextView) con.findViewById(R.id.balance);
+                            walletBalance.setText(displayWallet());
+                        }
+                    });
             	}   
                     Log.e("Successfully sent payment of one CENT, total remaining on channel is now {}", client.state().getValueRefunded().toString());
                 
@@ -187,12 +200,25 @@ public class PaymentChannelClient {
   
     private void waitForSufficientBalance(BigInteger amount) {
         // Not enough money in the wallet.
-        BigInteger amountPlusFee = amount.add(Wallet.SendRequest.DEFAULT_FEE_PER_KB);
+        amountPlusFee = amount.add(Wallet.SendRequest.DEFAULT_FEE_PER_KB);
         // ESTIMATED because we don't really need to wait for confirmation.
         ListenableFuture<BigInteger> balanceFuture = appKit.wallet().getBalanceFuture(amountPlusFee, Wallet.BalanceType.ESTIMATED);
         if (!balanceFuture.isDone()) {
             Log.e(TAG, "Please send " + Utils.bitcoinValueToFriendlyString(amountPlusFee) +
                     " BTC to " + myKey.toAddress(params));
+            
+            
+            con.runOnUiThread(new Runnable() {
+              public void run() {
+            	  
+            	  Log.e(TAG, "Toasting");
+                	
+                	CharSequence text = "Please send " + Utils.bitcoinValueToFriendlyString(amountPlusFee) +
+                            " BTC to " + myKey.toAddress(params);
+                    int duration = Toast.LENGTH_LONG;
+                	Toast.makeText(con.getApplicationContext(), text, duration).show();
+               }
+            });
             Futures.getUnchecked(balanceFuture);
         }
     }

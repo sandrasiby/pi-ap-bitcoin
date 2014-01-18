@@ -30,6 +30,8 @@ public class MainActivity extends Activity {
                 
         Log.e(TAG, "Starting Thread");
         
+        walletBalance.setText("Synchronizing");
+        
         new Thread(new Runnable() {
             public void run() {
               andClient.startWalletAppKit();
