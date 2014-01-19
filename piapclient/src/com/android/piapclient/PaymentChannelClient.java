@@ -36,7 +36,7 @@ public class PaymentChannelClient {
     private final BigInteger channelSize;
     private final ECKey myKey;
     private final NetworkParameters params;
-    private String host = "192.168.178.33"; //TO BE CHANGED (URI)
+    //private String host = "192.168.178.33"; //TO BE CHANGED (URI)
     private int rounds;
     private int interval; //minutes
     private String TAG = "PaymentClient";
@@ -96,7 +96,7 @@ public class PaymentChannelClient {
             return appKit.wallet().getBalance().toString();                    
     }
     
-    public void openConnection(){
+    public void openConnection(String host){
             
             appKit.wallet().addKey(myKey);
             appKit.wallet().allowSpendingUnconfirmedTransactions();

@@ -3,6 +3,7 @@ package com.android.piapclient;
 import com.android.piapclient.PaymentChannelClient;
 import com.android.piapclient.R;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
 import android.util.Log;
@@ -25,8 +26,10 @@ public class MainActivity extends Activity {
         
         
         //Capture host details. To be tested. Commenting for now.
-        //Uri data = getIntent().getData();
-        //String host = data.getHost();
+        Uri data = getIntent().getData();
+        final String host = data.getHost();
+        
+        Log.e(TAG, "Host is " + host);
                 
         Log.e(TAG, "Starting Thread");
         
@@ -52,7 +55,7 @@ public class MainActivity extends Activity {
                // Perform action on click
         	   new Thread(new Runnable() {
                    public void run() {
-                     andClient.openConnection();
+                     andClient.openConnection(host);
                    }
                  }).start();
                  Log.e(TAG, "Opened");
@@ -72,7 +75,6 @@ public class MainActivity extends Activity {
                     Log.e(TAG, "Closed");
            }
        });
-
         
     }
 
