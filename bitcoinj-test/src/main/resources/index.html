@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="">
+		<meta name="author" content="">
+
+		<title>Bitcoin AP</title>
+
+		<!-- Bootstrap core CSS -->
+		<link href="css/bootstrap.css" rel="stylesheet">
+
+		<!-- Custom styles for this template -->
+		<link href="justified-nav.css" rel="stylesheet">
+		<link href="css/font-awesome.min.css" rel="stylesheet">
+
+	</head>
+
+	<body>
+
+		<div class="container">
+
+			<div class="masthead">
+				<h3 class="text-muted">Bitcoin AP</h3>
+				<ul class="nav nav-justified">
+					<li class="active">
+						<a href="#">Overview</a>
+					</li>
+					<li>
+						<a href="#">Configuration</a>
+					</li>
+					<li>
+						<a href="#">About</a>
+					</li>
+				</ul>
+			</div>
+
+			<p>
+
+				<div class="row">
+
+					<div class="col-lg-3">
+						<div class="panel panel-default">
+							<div class="panel-heading">
+								Wallet details
+							</div>
+							<div class="panel-body" id="wallet-details">
+								Wallet balance: {{ wallet.balance }} <i class="fa fa-btc"></i>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-lg-9" id="channels">
+						<script type="text/html" id="channels-template">
+							<h2>Open channels</h2>
+							<table class="table table-striped">
+							<thead>
+							<tr>
+							<th>ID</th>
+							<th>Value</th>
+							<th>Status</th>
+							<th>Lock Time</th>
+							</tr>
+							</thead>
+							<tbody>
+							{{#channels}}
+							<tr>
+							<td>{{id}}</td>
+							<td>{{paid}} <i class="fa fa-btc"></i></td>
+							<td>{{status}}</td>
+							<td>{{timeRemaining}}</td>
+							</tr>
+							{{/channels}}
+							</tbody>
+							</table>
+						</script>
+					</div>
+
+					<div class="col-lg-9 col-md-offset-3" id="transactions">
+						<script type="text/html" id="transactions-template">
+							<h1>Transactions</h1>
+							<table class="table table-striped">
+							<thead>
+							<tr>
+							<th>ID</th>
+							<th>Value</th>
+							</tr>
+							</thead>
+							<tbody>
+							{{#transactions}}
+							<tr>
+							<td><a href="http://blockexplorer.com/testnet/tx/{{hash}}" target="_blank">{{hash}}</a></td>
+							<td>{{value}} <i class="fa fa-btc"></i></td>
+							</tr>
+							{{/transactions}}
+							</tbody>
+							</table>
+						</script>
+					</div>
+				</div>
+			</p>
+
+		</div>
+		<!-- /container -->
+
+		<!-- Bootstrap core JavaScript
+		================================================== -->
+		<!-- Placed at the end of the document so the pages load faster -->
+		<script src="js/jquery.min.js"></script>
+		<script src="js/mustache.js"></script>
+
+		<script>
+			var walletTemplate = $("#wallet-details").html();
+			var channelsTemplate = $("#channels-template").html();
+			var transactionsTemplate = $("#transactions-template").html();
+			Mustache.parse(walletTemplate);
+
+			function update() {
+				$.getJSON("/json", function(data) {
+					$("#wallet-details").html(Mustache.render(walletTemplate, data));
+					$("#transactions").html(Mustache.render(transactionsTemplate, data.wallet));
+					$("#channels").html(Mustache.render(channelsTemplate, data));
+				});
+			}
+
+			setInterval(update, 1000);
+			update();
+		</script>
+	</body>
+</html>

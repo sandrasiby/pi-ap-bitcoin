@@ -61,8 +61,8 @@ public class ExamplePaymentChannelClient {
         channelSize = CENT;
         myKey = new ECKey();
         params = TestNet3Params.get();
-        rounds = 10;
-        interval = 5;
+        rounds = 120;
+        interval = 1;
     }
 
     public void run(final String host) throws Exception {
@@ -106,7 +106,7 @@ public class ExamplePaymentChannelClient {
         //log.info(appKit.wallet().toString());
         //openAndSend(timeoutSecs, server, channelID);
         log.info("Waiting ...");
-        Thread.sleep(60 * 60 * 1000);  // 1 hour.
+        Thread.sleep(1000);  // 1 hour.
         log.info("Stopping ...");
         appKit.stopAndWait();
     }
@@ -117,13 +117,13 @@ public class ExamplePaymentChannelClient {
         // Opening the channel requires talking to the server, so it's asynchronous.
         final CountDownLatch latch = new CountDownLatch(1);
         Futures.addCallback(client.getChannelOpenFuture(), new FutureCallback<PaymentChannelClientConnection>() {
-            @Override
+
             public void onSuccess(PaymentChannelClientConnection client) {
                 // Success! We should be able to try making micropayments now. Try doing it 5 times.
                 for (int i = 0; i < rounds; i++) {
                     try {
-                        client.incrementPayment(CENT.divide(TEN));
-                        Thread.sleep(interval * 60 * 1000);
+                        client.incrementPayment(new BigInteger("10"));
+                        Thread.sleep(interval * 1000);
                     } catch (ValueOutOfRangeException e) {
                         log.error("Failed to increment payment by a CENT, remaining value is {}", client.state().getValueRefunded());
                         System.exit(-3);
@@ -147,7 +147,6 @@ public class ExamplePaymentChannelClient {
                 latch.countDown();
             }
 
-            @Override
             public void onFailure(Throwable throwable) {
                 log.error("Failed to open connection", throwable);
                 latch.countDown();

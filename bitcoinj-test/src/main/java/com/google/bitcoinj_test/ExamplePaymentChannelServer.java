@@ -16,14 +16,6 @@
 
 package com.google.bitcoinj_test;
 
-import com.google.bitcoin.core.*;
-import com.google.bitcoin.kits.WalletAppKit;
-import com.google.bitcoin.params.TestNet3Params;
-import com.google.bitcoin.protocols.channels.*;
-import com.google.bitcoin.utils.BriefLogFormatter;
-
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +25,24 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.slf4j.LoggerFactory;
+
+import com.google.bitcoin.core.NetworkParameters;
+import com.google.bitcoin.core.Sha256Hash;
+import com.google.bitcoin.core.Utils;
+import com.google.bitcoin.core.VerificationException;
+import com.google.bitcoin.core.Wallet;
+import com.google.bitcoin.kits.WalletAppKit;
+import com.google.bitcoin.params.TestNet3Params;
+import com.google.bitcoin.protocols.channels.PaymentChannelCloseException;
+import com.google.bitcoin.protocols.channels.PaymentChannelServerListener;
+import com.google.bitcoin.protocols.channels.PaymentChannelServerState;
+import com.google.bitcoin.protocols.channels.ServerConnectionEventHandler;
+import com.google.bitcoin.protocols.channels.StoredPaymentChannelServerStates;
+import com.google.bitcoin.utils.BriefLogFormatter;
 
 /**
  * Simple server that listens on port 4242 for incoming payment channels.
@@ -48,7 +58,9 @@ public class ExamplePaymentChannelServer implements PaymentChannelServerListener
 
     public static void main(String[] args) throws Exception {
         BriefLogFormatter.init();
-        new ExamplePaymentChannelServer().run();
+        ExamplePaymentChannelServer channelServer = new ExamplePaymentChannelServer(); 
+        new Thread(new WebInterface(channelServer)).start();
+        channelServer.run();
     }
 
     public void run() throws Exception {
@@ -75,8 +87,9 @@ public class ExamplePaymentChannelServer implements PaymentChannelServerListener
         // an implementation of HandlerFactory, which we just implement ourselves.
         new PaymentChannelServerListener(appKit.peerGroup(), appKit.wallet(), 15, Utils.CENT, this).bindAndStart(4242);
     }
+    
+    private Map<Sha256Hash, PaymentChannelServerState> openChannels = new HashMap<Sha256Hash, PaymentChannelServerState>();
 
-    @Override
     public ServerConnectionEventHandler onNewConnection(final SocketAddress clientAddress) {
         // Each connection needs a handler which is informed when that payment channel gets adjusted. Here we just log
         // things. In a real app this object would be connected to some business logic.
@@ -128,6 +141,7 @@ public class ExamplePaymentChannelServer implements PaymentChannelServerListener
                 PaymentChannelServerState state = null;
                 try {
                     state = storedStates.getChannel(channelId).getOrCreateState(appKit.wallet(), appKit.peerGroup());
+                    openChannels.put(channelId, state);
                 } catch (VerificationException e) {
                     // This indicates corrupted data, and since the channel was just opened, cannot happen
                     throw new RuntimeException(e);
@@ -149,7 +163,7 @@ public class ExamplePaymentChannelServer implements PaymentChannelServerListener
             @Override
             public void channelClosed(PaymentChannelCloseException.CloseReason reason) {
                 log.info("Client {} closed channel for reason {}", clientAddress, reason);
-                
+
                 //Change firewall rules when channel closes
                 try {
             	    	String[] cmd2 = {"./firewall.sh", "close", clientAddress.toString(), clientMac};
@@ -168,4 +182,13 @@ public class ExamplePaymentChannelServer implements PaymentChannelServerListener
             }
         };
     }
+    
+    public Wallet getWallet() {
+    	return appKit.wallet();
+    }
+    
+    public Map<Sha256Hash, PaymentChannelServerState> getChannelStates() {
+    	return this.openChannels;
+    }
+    
 }
